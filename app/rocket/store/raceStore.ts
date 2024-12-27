@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { RaceState } from "../types";
+import { RaceState } from "../types/index";
 
 export const useRaceStore = create<RaceState>()(
   persist(
@@ -13,9 +13,25 @@ export const useRaceStore = create<RaceState>()(
       setActiveRace: (raceId) => set({ activeRaceId: raceId }),
 
       addFinishedRace: (race) =>
-        set((state) => ({
-          finishedRaces: [race, ...state.finishedRaces].slice(0, 10), // Keep only last 10 races
-        })),
+        set((state) => {
+          // Check if race already exists
+          if (
+            state.finishedRaces.some(
+              (finishedRace) => finishedRace.id === race.id
+            )
+          ) {
+            return state; // Don't add duplicate races
+          }
+          return {
+            finishedRaces: [
+              {
+                ...race,
+                uniqueKey: `${race.id}-${Date.now()}`, // Add a unique key combining race ID and timestamp
+              },
+              ...state.finishedRaces,
+            ].slice(0, 10), // Keep only last 10 races
+          };
+        }),
 
       selectRocket: (rocketId) =>
         set((state) => {

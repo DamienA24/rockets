@@ -1,6 +1,6 @@
 import { useQuery } from "@apollo/client";
 import { GET_RACE, GET_ROCKETS } from "../graphql/queries";
-import { RaceResultProps, Rocket } from "../types";
+import { RaceResultProps, Rocket } from "../types/index";
 import RocketDisplay from "./RocketDisplay";
 
 export default function RaceResult({ raceId }: RaceResultProps) {
