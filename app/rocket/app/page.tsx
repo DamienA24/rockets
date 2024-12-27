@@ -119,19 +119,23 @@ function RocketRace() {
   useEffect(() => {
     if (!raceId || selectedRockets.length !== 2) return;
 
-    const allRocketsFinished = selectedRockets.some((rocketId) => {
-      const progress = rocketProgress[rocketId];
-      return progress && (progress.progress === 100 || progress.exploded);
-    });
+    const allRocketsFinished = Object.values(rocketProgress).some(
+      (progress) => progress && (progress.progress === 100 || progress.exploded)
+    );
 
     if (allRocketsFinished) {
-      checkRaceResult(raceId).then((race) => {
-        if (race) {
-          addFinishedRace(race);
-          setActiveRace(null);
-          clearSelectedRockets();
-        }
-      });
+      const timer = setTimeout(() => {
+        checkRaceResult(raceId).then((race) => {
+          if (race) {
+            addFinishedRace(race);
+            setActiveRace(null);
+            clearSelectedRockets();
+            clearRocketProgress();
+          }
+        });
+      }, 1000); // Add a small delay to ensure animations complete
+
+      return () => clearTimeout(timer);
     }
   }, [
     raceId,
@@ -141,6 +145,7 @@ function RocketRace() {
     addFinishedRace,
     setActiveRace,
     clearSelectedRockets,
+    clearRocketProgress,
   ]);
 
   if (rocketsLoading) {
@@ -156,36 +161,9 @@ function RocketRace() {
     <div className="max-w-6xl mx-auto p-8">
       <h1 className="text-4xl font-bold text-center mb-12">🚀 Rocket Race</h1>
 
-      {isRaceActive ? (
-        <div className="space-y-8">
-          <RaceTrack
-            rocket1Progress={rocketProgress[selectedRockets[0]]?.progress || 0}
-            rocket2Progress={rocketProgress[selectedRockets[1]]?.progress || 0}
-            rocket1Exploded={
-              rocketProgress[selectedRockets[0]]?.exploded || false
-            }
-            rocket2Exploded={
-              rocketProgress[selectedRockets[1]]?.exploded || false
-            }
-            rocket1Name={
-              rockets.find((r: Rocket) => r.id === selectedRockets[0])?.name ||
-              ""
-            }
-            rocket2Name={
-              rockets.find((r: Rocket) => r.id === selectedRockets[1])?.name ||
-              ""
-            }
-          />
-          <button
-            className="mx-auto block px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            onClick={() => setActiveRace(null)}
-          >
-            New Race
-          </button>
-        </div>
-      ) : (
+      {!isRaceActive && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             {rockets.map((rocket: Rocket) => (
               <RocketCard
                 key={rocket.id}
@@ -196,11 +174,11 @@ function RocketRace() {
             ))}
           </div>
           <button
-            className={`mx-auto block px-6 py-3 rounded-lg transition-colors ${
+            className={`px-6 py-2 rounded-lg ${
               selectedRockets.length === 2
-                ? "bg-blue-500 text-white hover:bg-blue-600"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
+                ? "bg-blue-500 hover:bg-blue-600 text-white"
+                : "bg-gray-300 cursor-not-allowed text-gray-600"
+            } transition-colors duration-200`}
             onClick={handleStartRace}
             disabled={selectedRockets.length !== 2}
           >
@@ -209,13 +187,26 @@ function RocketRace() {
         </>
       )}
 
+      {isRaceActive && (
+        <div className="w-full max-w-4xl mx-auto">
+          <RaceTrack
+            rocket1Progress={rocketProgress[selectedRockets[0]]?.progress || 0}
+            rocket2Progress={rocketProgress[selectedRockets[1]]?.progress || 0}
+            rocket1Exploded={rocketProgress[selectedRockets[0]]?.exploded || false}
+            rocket2Exploded={rocketProgress[selectedRockets[1]]?.exploded || false}
+            rocket1Name={rockets.find((r: Rocket) => r.id === selectedRockets[0])?.name || ''}
+            rocket2Name={rockets.find((r: Rocket) => r.id === selectedRockets[1])?.name || ''}
+          />
+        </div>
+      )}
+
       {finishedRaces.length > 0 && (
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">Previous Races</h2>
           <div className="space-y-4">
             {finishedRaces.map((race) => (
               <RaceResult
-                key={race.id || `${race.id}-${Date.now()}`}
+                key={race.id}
                 raceId={race.id}
               />
             ))}

@@ -2,6 +2,13 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { RaceState } from "../types/index";
 
+// Create a broadcast channel for cross-tab communication
+const channel =
+  typeof window !== "undefined" ? new BroadcastChannel("race_channel") : null;
+
+// Helper to prevent infinite loops
+let isHandlingMessage = false;
+
 export const useRaceStore = create<RaceState>()(
   persist(
     (set) => ({
@@ -10,9 +17,14 @@ export const useRaceStore = create<RaceState>()(
       selectedRockets: [],
       rocketProgress: {},
 
-      setActiveRace: (raceId) => set({ activeRaceId: raceId }),
+      setActiveRace: (raceId: string | null) => {
+        if (isHandlingMessage) return;
+        set({ activeRaceId: raceId });
+        channel?.postMessage({ type: "SET_ACTIVE_RACE", payload: raceId });
+      },
 
-      addFinishedRace: (race) =>
+      addFinishedRace: (race) => {
+        if (isHandlingMessage) return;
         set((state) => {
           // Check if race already exists
           if (
@@ -20,51 +32,121 @@ export const useRaceStore = create<RaceState>()(
               (finishedRace) => finishedRace.id === race.id
             )
           ) {
-            return state; // Don't add duplicate races
+            return state;
           }
           return {
-            finishedRaces: [
-              {
-                ...race,
-                uniqueKey: `${race.id}-${Date.now()}`, // Add a unique key combining race ID and timestamp
-              },
-              ...state.finishedRaces,
-            ].slice(0, 10), // Keep only last 10 races
+            finishedRaces: [race, ...state.finishedRaces].slice(0, 10),
           };
-        }),
+        });
+        channel?.postMessage({ type: "ADD_FINISHED_RACE", payload: race });
+      },
 
-      selectRocket: (rocketId) =>
+      selectRocket: (rocketId) => {
+        if (isHandlingMessage) return;
         set((state) => {
-          const currentSelected = state.selectedRockets;
-          if (currentSelected.includes(rocketId)) {
-            return {
-              selectedRockets: currentSelected.filter((id) => id !== rocketId),
-            };
-          }
-          if (currentSelected.length >= 2) {
-            return {
-              selectedRockets: [currentSelected[1], rocketId],
-            };
-          }
-          return {
-            selectedRockets: [...currentSelected, rocketId],
-          };
-        }),
+          const currentRockets = [...state.selectedRockets];
 
-      clearSelectedRockets: () => set({ selectedRockets: [] }),
+          if (currentRockets.includes(rocketId)) {
+            const newRockets = currentRockets.filter((id) => id !== rocketId);
+            channel?.postMessage({
+              type: "SET_SELECTED_ROCKETS",
+              payload: newRockets,
+            });
+            return { selectedRockets: newRockets };
+          }
 
-      updateRocketProgress: (rocketId, progress) =>
+          if (currentRockets.length === 2) {
+            const newRockets = [currentRockets[1], rocketId];
+            channel?.postMessage({
+              type: "SET_SELECTED_ROCKETS",
+              payload: newRockets,
+            });
+            return { selectedRockets: newRockets };
+          }
+
+          const newRockets = [...currentRockets, rocketId];
+          channel?.postMessage({
+            type: "SET_SELECTED_ROCKETS",
+            payload: newRockets,
+          });
+          return { selectedRockets: newRockets };
+        });
+      },
+
+      clearSelectedRockets: () => {
+        if (isHandlingMessage) return;
+        set({ selectedRockets: [] });
+        channel?.postMessage({ type: "SET_SELECTED_ROCKETS", payload: [] });
+      },
+
+      updateRocketProgress: (rocketId, progress) => {
+        if (isHandlingMessage) return;
         set((state) => ({
           rocketProgress: {
             ...state.rocketProgress,
             [rocketId]: progress,
           },
-        })),
+        }));
+        channel?.postMessage({
+          type: "UPDATE_ROCKET_PROGRESS",
+          payload: { rocketId, progress },
+        });
+      },
 
-      clearRocketProgress: () => set({ rocketProgress: {} }),
+      clearRocketProgress: () => {
+        if (isHandlingMessage) return;
+        set({ rocketProgress: {} });
+        channel?.postMessage({ type: "CLEAR_ROCKET_PROGRESS" });
+      },
     }),
     {
       name: "race-storage",
     }
   )
 );
+
+// Set up broadcast channel listener
+if (typeof window !== "undefined") {
+  channel?.addEventListener("message", (event) => {
+    try {
+      isHandlingMessage = true;
+      const { type, payload } = event.data;
+
+      switch (type) {
+        case "SET_ACTIVE_RACE":
+          useRaceStore.setState({ activeRaceId: payload });
+          break;
+
+        case "ADD_FINISHED_RACE":
+          useRaceStore.setState((state) => {
+            if (state.finishedRaces.some((race) => race.id === payload.id)) {
+              return state;
+            }
+            return {
+              finishedRaces: [payload, ...state.finishedRaces].slice(0, 10),
+            };
+          });
+          break;
+
+        case "SET_SELECTED_ROCKETS":
+          useRaceStore.setState({ selectedRockets: payload });
+          break;
+
+        case "UPDATE_ROCKET_PROGRESS":
+          useRaceStore.setState((state) => ({
+            rocketProgress: {
+              ...state.rocketProgress,
+              [payload.rocketId]: payload.progress,
+            },
+          }));
+          break;
+
+        case "CLEAR_ROCKET_PROGRESS":
+          useRaceStore.setState({ rocketProgress: {} });
+          break;
+      }
+    } finally {
+      isHandlingMessage = false;
+    }
+  });
+}
