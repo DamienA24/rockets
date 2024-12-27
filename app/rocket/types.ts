@@ -45,3 +45,27 @@ export interface RocketDisplayProps {
 export interface RaceResultProps {
   raceId: string;
 }
+
+export interface Race {
+  id: string;
+  winner: string;
+  participants: string[];
+  startTime: string;
+  endTime: string;
+}
+
+export interface RaceState {
+  activeRaceId: string | null;
+  finishedRaces: Race[];
+  selectedRockets: string[];
+  rocketProgress: Record<string, RocketProgressItem>;
+  setActiveRace: (raceId: string | null) => void;
+  addFinishedRace: (race: Race) => void;
+  selectRocket: (rocketId: string) => void;
+  clearSelectedRockets: () => void;
+  updateRocketProgress: (
+    rocketId: string,
+    progress: RocketProgressItem
+  ) => void;
+  clearRocketProgress: () => void;
+}

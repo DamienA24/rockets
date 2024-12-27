@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import {
   ApolloProvider,
   useQuery,
-  useMutation,
   useSubscription,
   useApolloClient,
 } from "@apollo/client";
@@ -18,45 +17,46 @@ import {
 import RocketCard from "../components/RocketCard";
 import RaceTrack from "../components/RaceTrack";
 import RaceResult from "../components/RaceResult";
-import { Rocket, RocketProgressState } from "../types";
+import { Rocket } from "../types";
+import { useRaceStore } from "../store/raceStore";
 
 function RocketRace() {
   const client = useApolloClient();
-  const [selectedRockets, setSelectedRockets] = useState<string[]>([]);
-  const [raceId, setRaceId] = useState<string | null>(null);
-  const [finishedRaces, setFinishedRaces] = useState<string[]>([]);
-  const [rocketProgress, setRocketProgress] = useState<RocketProgressState>({});
-
   const { data: rocketsData, loading: rocketsLoading } = useQuery(GET_ROCKETS);
-  const [startRace] = useMutation(START_RACE);
+
+  const {
+    activeRaceId: raceId,
+    selectedRockets,
+    rocketProgress,
+    finishedRaces,
+    setActiveRace,
+    addFinishedRace,
+    selectRocket,
+    clearSelectedRockets,
+    updateRocketProgress,
+    clearRocketProgress,
+  } = useRaceStore();
 
   const handleRocketSelect = (rocketId: string) => {
-    setSelectedRockets((prev) => {
-      if (prev.includes(rocketId)) {
-        return prev.filter((id) => id !== rocketId);
-      }
-      if (prev.length < 2) {
-        return [...prev, rocketId];
-      }
-      return [prev[1], rocketId];
-    });
+    selectRocket(rocketId);
   };
 
   const handleStartRace = async () => {
     if (selectedRockets.length !== 2) return;
 
     try {
-      const { data } = await startRace({
+      const result = await client.mutate({
+        mutation: START_RACE,
         variables: {
           rocket1: selectedRockets[0],
           rocket2: selectedRockets[1],
         },
       });
-      setRaceId(data.startRace.id);
-      setRocketProgress({
-        [selectedRockets[0]]: { progress: 0, exploded: false },
-        [selectedRockets[1]]: { progress: 0, exploded: false },
-      });
+
+      if (result.data?.startRace?.id) {
+        setActiveRace(result.data.startRace.id);
+        clearRocketProgress();
+      }
     } catch (error) {
       console.error("Error starting race:", error);
     }
@@ -86,69 +86,62 @@ function RocketRace() {
     [client]
   );
 
+  // Subscribe to progress updates for both rockets
+  useSubscription(ROCKET_PROGRESS_SUBSCRIPTION, {
+    variables: {
+      raceId,
+      rocketId: selectedRockets[0],
+    },
+    skip: !raceId || !selectedRockets[0],
+    onData: ({ data }) => {
+      if (data.data?.rocketProgress) {
+        const { rocketId, progress, exploded } = data.data.rocketProgress;
+        updateRocketProgress(rocketId, { progress, exploded });
+      }
+    },
+  });
+
+  useSubscription(ROCKET_PROGRESS_SUBSCRIPTION, {
+    variables: {
+      raceId,
+      rocketId: selectedRockets[1],
+    },
+    skip: !raceId || !selectedRockets[1],
+    onData: ({ data }) => {
+      if (data.data?.rocketProgress) {
+        const { rocketId, progress, exploded } = data.data.rocketProgress;
+        updateRocketProgress(rocketId, { progress, exploded });
+      }
+    },
+  });
+
+  // Check race completion
   useEffect(() => {
     if (!raceId || selectedRockets.length !== 2) return;
 
-    const subscriptions = selectedRockets.map((rocketId) =>
-      client
-        .subscribe({
-          query: ROCKET_PROGRESS_SUBSCRIPTION,
-          variables: { raceId, rocketId },
-        })
-        .subscribe({
-          next({ data }) {
-            if (data?.rocketProgress) {
-              setRocketProgress((prev) => ({
-                ...prev,
-                [data.rocketProgress.rocketId]: {
-                  progress: data.rocketProgress.progress,
-                  exploded: data.rocketProgress.exploded,
-                },
-              }));
+    const allRocketsFinished = selectedRockets.some((rocketId) => {
+      const progress = rocketProgress[rocketId];
+      return progress && (progress.progress === 100 || progress.exploded);
+    });
 
-              if (
-                data.rocketProgress.progress === 100 ||
-                data.rocketProgress.exploded
-              ) {
-                const currentProgress: RocketProgressState = {
-                  ...rocketProgress,
-                  [data.rocketProgress.rocketId]: {
-                    progress: data.rocketProgress.progress,
-                    exploded: data.rocketProgress.exploded,
-                  },
-                };
-
-                const allRocketsFinished = selectedRockets.some(
-                  (rocketId) =>
-                    currentProgress[rocketId]?.progress === 100 ||
-                    currentProgress[rocketId]?.exploded
-                );
-
-                if (allRocketsFinished && raceId) {
-                  checkRaceResult(raceId).then((race) => {
-                    if (race) {
-                      setFinishedRaces((prev) => {
-                        if (!prev.includes(raceId)) {
-                          return [raceId, ...prev].slice(0, 5);
-                        }
-                        return prev;
-                      });
-                    }
-                  });
-                }
-              }
-            }
-          },
-          error(err) {
-            console.error("Subscription error:", err);
-          },
-        })
-    );
-
-    return () => {
-      subscriptions.forEach((sub) => sub.unsubscribe());
-    };
-  }, [raceId, selectedRockets, checkRaceResult, client, rocketProgress]);
+    if (allRocketsFinished) {
+      checkRaceResult(raceId).then((race) => {
+        if (race) {
+          addFinishedRace(race);
+          setActiveRace(null);
+          clearSelectedRockets();
+        }
+      });
+    }
+  }, [
+    raceId,
+    selectedRockets,
+    rocketProgress,
+    checkRaceResult,
+    addFinishedRace,
+    setActiveRace,
+    clearSelectedRockets,
+  ]);
 
   if (rocketsLoading) {
     return <div className="text-center">Loading rockets...</div>;
@@ -185,7 +178,7 @@ function RocketRace() {
           />
           <button
             className="mx-auto block px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            onClick={() => setRaceId(null)}
+            onClick={() => setActiveRace(null)}
           >
             New Race
           </button>
@@ -220,8 +213,8 @@ function RocketRace() {
         <div className="mt-12">
           <h2 className="text-2xl font-bold mb-6">Recent Races</h2>
           <div className="space-y-4">
-            {finishedRaces.map((id) => (
-              <RaceResult key={id} raceId={id} />
+            {finishedRaces.map((race) => (
+              <RaceResult key={race.id} raceId={race.id} />
             ))}
           </div>
         </div>
