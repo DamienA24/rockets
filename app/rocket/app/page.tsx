@@ -211,9 +211,9 @@ function RocketRace() {
       )}
 
       {finishedRaces.length > 0 && (
-        <div className="mt-8">
+        <div className="mt-8 ">
           <h2 className="text-2xl font-bold mb-4">Previous Races</h2>
-          <div className="space-y-4">
+          <div className="space-y-4 ">
             {finishedRaces.map((race) => (
               <RaceResult key={race.id} raceId={race.id} />
             ))}

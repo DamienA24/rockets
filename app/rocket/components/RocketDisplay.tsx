@@ -7,7 +7,6 @@ export default function RocketDisplay({
   isWinner,
   rocketInfo,
 }: RocketDisplayProps) {
-  console.log("rocketInfo", rocketInfo);
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
@@ -19,7 +18,7 @@ export default function RocketDisplay({
             className="object-cover rounded"
           />
         </div>
-        <p className="font-medium text-black">
+        <p className="font-medium">
           {rocketInfo.name}
           {isWinner && " 🏆"}
         </p>

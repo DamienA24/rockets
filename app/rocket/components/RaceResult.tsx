@@ -79,15 +79,11 @@ export default function RaceResult({ raceId }: RaceResultProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-4 hover:shadow-lg transition-shadow">
-      <h3 className="text-xl text-black font-bold mb-4">
-        Course #{raceId.slice(-4)}
-      </h3>
+    <div className="bg-secondary border border-primary rounded-lg shadow-md p-6 mb-4 hover:shadow-lg transition-shadow">
+      <h3 className="text-xl font-bold mb-4">Course #{raceId.slice(-4)}</h3>
       <div className="space-y-6">
         <div className="text-center font-medium text-lg mb-4">
-          <span className={winner ? "text-green-500" : "text-blue-500"}>
-            {getRaceStatus()}
-          </span>
+          <span>{getRaceStatus()}</span>
         </div>
 
         <div className="grid grid-cols-2 gap-6">
