@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
         pathname: "/static/**",
       },
     ],
+    loader: "custom",
+    loaderFile: "./utils/image-loader.ts",
   },
 };
 
