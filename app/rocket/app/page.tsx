@@ -119,21 +119,25 @@ function RocketRace() {
   useEffect(() => {
     if (!raceId || selectedRockets.length !== 2) return;
 
-    const allRocketsFinished = Object.values(rocketProgress).some(
-      (progress) => progress && (progress.progress === 100 || progress.exploded)
-    );
+    const rocket1Status = rocketProgress[selectedRockets[0]];
+    const rocket2Status = rocketProgress[selectedRockets[1]];
 
-    if (allRocketsFinished) {
-      const timer = setTimeout(() => {
-        checkRaceResult(raceId).then((race) => {
-          if (race) {
-            addFinishedRace(race);
-            setActiveRace(null);
-            clearSelectedRockets();
-            clearRocketProgress();
-          }
-        });
-      }, 1000); // Add a small delay to ensure animations complete
+    const raceFinished =
+      rocket1Status?.progress === 100 ||
+      rocket2Status?.progress === 100 ||
+      rocket1Status?.exploded ||
+      rocket2Status?.exploded;
+
+    if (raceFinished) {
+      const timer = setTimeout(async () => {
+        const race = await checkRaceResult(raceId);
+        if (race) {
+          addFinishedRace(race);
+          setActiveRace(null);
+          clearSelectedRockets();
+          clearRocketProgress();
+        }
+      }, 1000);
 
       return () => clearTimeout(timer);
     }
@@ -154,8 +158,6 @@ function RocketRace() {
 
   const rockets = rocketsData?.rockets || [];
   const isRaceActive = raceId !== null;
-
-  console.log("finishedRaces", finishedRaces);
 
   return (
     <div className="max-w-6xl mx-auto p-8">
@@ -192,10 +194,20 @@ function RocketRace() {
           <RaceTrack
             rocket1Progress={rocketProgress[selectedRockets[0]]?.progress || 0}
             rocket2Progress={rocketProgress[selectedRockets[1]]?.progress || 0}
-            rocket1Exploded={rocketProgress[selectedRockets[0]]?.exploded || false}
-            rocket2Exploded={rocketProgress[selectedRockets[1]]?.exploded || false}
-            rocket1Name={rockets.find((r: Rocket) => r.id === selectedRockets[0])?.name || ''}
-            rocket2Name={rockets.find((r: Rocket) => r.id === selectedRockets[1])?.name || ''}
+            rocket1Exploded={
+              rocketProgress[selectedRockets[0]]?.exploded || false
+            }
+            rocket2Exploded={
+              rocketProgress[selectedRockets[1]]?.exploded || false
+            }
+            rocket1Name={
+              rockets.find((r: Rocket) => r.id === selectedRockets[0])?.name ||
+              ""
+            }
+            rocket2Name={
+              rockets.find((r: Rocket) => r.id === selectedRockets[1])?.name ||
+              ""
+            }
           />
         </div>
       )}
@@ -205,10 +217,7 @@ function RocketRace() {
           <h2 className="text-2xl font-bold mb-4">Previous Races</h2>
           <div className="space-y-4">
             {finishedRaces.map((race) => (
-              <RaceResult
-                key={race.id}
-                raceId={race.id}
-              />
+              <RaceResult key={race.id} raceId={race.id} />
             ))}
           </div>
         </div>
