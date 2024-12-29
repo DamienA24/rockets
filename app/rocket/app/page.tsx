@@ -19,6 +19,7 @@ import RaceTrack from "../components/RaceTrack";
 import RaceResult from "../components/RaceResult";
 import { Rocket } from "../types";
 import { useRaceStore } from "../store/raceStore";
+import { Button } from "@/components/ui/Button";
 
 function RocketRace() {
   const client = useApolloClient();
@@ -175,17 +176,14 @@ function RocketRace() {
               />
             ))}
           </div>
-          <button
-            className={`px-6 py-2 rounded-lg ${
-              selectedRockets.length === 2
-                ? "bg-blue-500 hover:bg-blue-600 text-white"
-                : "bg-gray-300 cursor-not-allowed text-gray-600"
-            } transition-colors duration-200`}
+          <Button
+            className={`px-6 py-2 rounded-lg `}
+            variant={selectedRockets.length === 2 ? "default" : "secondary"}
             onClick={handleStartRace}
             disabled={selectedRockets.length !== 2}
           >
             Start Race
-          </button>
+          </Button>
         </>
       )}
 
