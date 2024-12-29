@@ -19,3 +19,18 @@ services:
     image: redis:latest
     ports:
       - 6379:6379
+
+  # Next.js frontend
+  frontend:
+    build:
+      context: ./app/rocket
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./app/rocket:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - graphql-node
+    command: ["yarn", "dev"]

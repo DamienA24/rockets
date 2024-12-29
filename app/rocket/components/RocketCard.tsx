@@ -18,7 +18,13 @@ export default function RocketCard({
       onClick={onSelect}
     >
       <div className="relative w-full h-48 mb-4">
-        <Image src={image} alt={name} fill className="object-contain" />
+        <Image
+          src={image}
+          alt={name}
+          className="object-contain"
+          fill
+          priority
+        />
       </div>
       <h3
         className={`text-xl font-bold mb-2 ${isSelected ? "text-black" : ""}`}
