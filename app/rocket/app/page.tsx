@@ -176,14 +176,19 @@ function RocketRace() {
               />
             ))}
           </div>
-          <Button
-            className={`px-6 py-2 rounded-lg `}
-            variant={selectedRockets.length === 2 ? "default" : "secondary"}
-            onClick={handleStartRace}
-            disabled={selectedRockets.length !== 2}
-          >
-            Start Race
-          </Button>
+          <div className="flex justify-center">
+            <Button
+              className={`px-6 py-2 rounded-lg ${
+                selectedRockets.length === 2 ? "" : "cursor-not-allowed"
+              }`}
+              variant={selectedRockets.length === 2 ? "default" : "secondary"}
+              onClick={
+                selectedRockets.length === 2 ? handleStartRace : undefined
+              }
+            >
+              Start Race
+            </Button>
+          </div>
         </>
       )}
 

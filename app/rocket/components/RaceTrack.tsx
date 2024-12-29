@@ -1,4 +1,5 @@
 import { RaceTrackProps } from "../types/index";
+import { Progress } from "./ui/Progress";
 
 export default function RaceTrack({
   rocket1Progress,
@@ -22,25 +23,26 @@ export default function RaceTrack({
           >
             {rocket1Name} {isRocket1Winner && "🏆"}
           </span>
-          <div className="flex-1 h-8 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className={`h-full transition-all duration-500 ${
+          <div className="flex-1">
+            <Progress
+              value={rocket1Progress}
+              className={rocket1Exploded ? "bg-destructive/20" : "bg-secondary/20"}
+              indicatorClassName={
                 rocket1Exploded
-                  ? "bg-red-500"
+                  ? "bg-destructive"
                   : isRocket1Winner
-                  ? "bg-blue-500 animate-pulse"
-                  : "bg-blue-500"
-              }`}
-              style={{ width: `${rocket1Progress}%` }}
+                  ? "bg-primary animate-pulse"
+                  : "bg-primary"
+              }
             />
           </div>
           <span className="w-16 text-right">{rocket1Progress}%</span>
         </div>
         {rocket1Exploded && (
-          <p className="text-red-500 text-sm">💥 Rocket exploded!</p>
+          <p className="text-destructive text-sm">💥 Rocket exploded!</p>
         )}
         {isRocket1Winner && (
-          <p className="text-green-500 text-sm animate-bounce">🎉 Winner! 🎊</p>
+          <p className="text-primary text-sm animate-bounce">🎉 Winner! 🎊</p>
         )}
       </div>
 
@@ -53,25 +55,26 @@ export default function RaceTrack({
           >
             {rocket2Name} {isRocket2Winner && "🏆"}
           </span>
-          <div className="flex-1 h-8 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className={`h-full transition-all duration-500 ${
+          <div className="flex-1">
+            <Progress
+              value={rocket2Progress}
+              className={rocket2Exploded ? "bg-destructive/20" : "bg-secondary/20"}
+              indicatorClassName={
                 rocket2Exploded
-                  ? "bg-red-500"
+                  ? "bg-destructive"
                   : isRocket2Winner
-                  ? "bg-green-500 animate-pulse"
-                  : "bg-green-500"
-              }`}
-              style={{ width: `${rocket2Progress}%` }}
+                  ? "bg-primary animate-pulse"
+                  : "bg-primary"
+              }
             />
           </div>
           <span className="w-16 text-right">{rocket2Progress}%</span>
         </div>
         {rocket2Exploded && (
-          <p className="text-red-500 text-sm">💥 Rocket exploded!</p>
+          <p className="text-destructive text-sm">💥 Rocket exploded!</p>
         )}
         {isRocket2Winner && (
-          <p className="text-green-500 text-sm animate-bounce">🎉 Winner! 🎊</p>
+          <p className="text-primary text-sm animate-bounce">🎉 Winner! 🎊</p>
         )}
       </div>
     </div>

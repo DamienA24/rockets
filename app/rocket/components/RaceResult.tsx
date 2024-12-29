@@ -59,7 +59,7 @@ export default function RaceResult({ raceId }: RaceResultProps) {
   const getRocketInfo = (rocketId: string) => {
     const rocket = rockets.find((r: Rocket) => r.id === rocketId);
     return {
-      name: rocket?.name || "Fusée inconnue",
+      name: rocket?.name || "Unknown rocket",
       description: rocket?.description || "",
       image: rocket?.image || "",
     };
@@ -70,17 +70,17 @@ export default function RaceResult({ raceId }: RaceResultProps) {
 
   const getRaceStatus = () => {
     if (rocket1.exploded && rocket2.exploded)
-      return "Les deux fusées ont explosé ! 💥";
+      return "The two rockets exploded ! 💥";
     if (winner) {
       const winningRocket = winner === rocket1.id ? rocket1Info : rocket2Info;
-      return `${winningRocket.name} remporte la course ! 🏆`;
+      return `${winningRocket.name} win ! 🏆`;
     }
-    return "Course en cours...";
+    return "Race in progress...";
   };
 
   return (
     <div className="bg-secondary border border-primary rounded-lg shadow-md p-6 mb-4 hover:shadow-lg transition-shadow">
-      <h3 className="text-xl font-bold mb-4">Course #{raceId.slice(-4)}</h3>
+      <h3 className="text-xl font-bold mb-4">Race #{raceId.slice(-4)}</h3>
       <div className="space-y-6">
         <div className="text-center font-medium text-lg mb-4">
           <span>{getRaceStatus()}</span>

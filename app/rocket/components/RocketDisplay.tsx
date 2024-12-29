@@ -1,5 +1,6 @@
 import { RocketDisplayProps } from "../types/index";
 import Image from "next/image";
+import { Progress } from "./ui/Progress";
 
 export default function RocketDisplay({
   progress,
@@ -24,21 +25,22 @@ export default function RocketDisplay({
         </p>
       </div>
       <div className="flex items-center gap-2">
-        <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
-          <div
-            className={`h-full transition-all duration-300 ${
+        <div className="flex-1">
+          <Progress
+            value={progress}
+            className="bg-white"
+            indicatorClassName={
               exploded
-                ? "bg-red-500"
+                ? "bg-destructive"
                 : isWinner
-                ? "bg-green-500"
+                ? "bg-primary"
                 : "bg-blue-500"
-            }`}
-            style={{ width: `${progress}%` }}
+            }
           />
         </div>
         <span className="text-sm font-medium">{progress}%</span>
       </div>
-      {exploded && <p className="text-red-500 text-sm">💥 Explosion !</p>}
+      {exploded && <p className="text-destructive text-sm">💥 Explosion !</p>}
     </div>
   );
 }
