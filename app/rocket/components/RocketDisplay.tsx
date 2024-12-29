@@ -9,9 +9,9 @@ export default function RocketDisplay({
   rocketInfo,
 }: RocketDisplayProps) {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3">
-        <div className="relative w-8 h-8">
+    <div className="space-y-2 sm:space-y-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="relative w-6 h-6 sm:w-8 sm:h-8">
           <Image
             src={rocketInfo.image}
             alt={rocketInfo.name}
@@ -19,7 +19,7 @@ export default function RocketDisplay({
             className="object-cover rounded"
           />
         </div>
-        <p className="font-medium">
+        <p className="font-medium text-sm sm:text-base truncate">
           {rocketInfo.name}
           {isWinner && " 🏆"}
         </p>
@@ -38,9 +38,9 @@ export default function RocketDisplay({
             }
           />
         </div>
-        <span className="text-sm font-medium">{progress}%</span>
+        <span className="text-xs sm:text-sm font-medium min-w-[3rem] text-right">{progress}%</span>
       </div>
-      {exploded && <p className="text-destructive text-sm">💥 Explosion !</p>}
+      {exploded && <p className="text-destructive text-xs sm:text-sm">💥 Explosion !</p>}
     </div>
   );
 }

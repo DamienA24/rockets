@@ -79,14 +79,14 @@ export default function RaceResult({ raceId }: RaceResultProps) {
   };
 
   return (
-    <div className="bg-secondary border border-primary rounded-lg shadow-md p-6 mb-4 hover:shadow-lg transition-shadow">
-      <h3 className="text-xl font-bold mb-4">Race #{raceId.slice(-4)}</h3>
-      <div className="space-y-6">
-        <div className="text-center font-medium text-lg mb-4">
+    <div className="bg-secondary border border-primary rounded-lg shadow-md p-4 sm:p-6 mb-4 hover:shadow-lg transition-shadow">
+      <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Race #{raceId.slice(-4)}</h3>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="text-center font-medium text-base sm:text-lg mb-3 sm:mb-4">
           <span>{getRaceStatus()}</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <RocketDisplay
             progress={rocket1.progress}
             exploded={rocket1.exploded}
