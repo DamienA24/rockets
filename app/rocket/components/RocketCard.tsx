@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { RocketCardProps } from "../types";
+import { RocketCardProps } from "../types/index";
 
 export default function RocketCard({
   name,

@@ -40,8 +40,6 @@ export interface RocketDisplayProps {
     name: string;
     image: string;
   };
-  name: string;
-  image: string;
 }
 
 export interface RaceResultProps {
