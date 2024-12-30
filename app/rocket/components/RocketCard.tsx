@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { RocketCardProps } from "../types/index";
+import { Card, CardDescription, CardTitle } from "./ui/Card";
 
 export default function RocketCard({
   name,
@@ -9,11 +10,11 @@ export default function RocketCard({
   onSelect,
 }: RocketCardProps) {
   return (
-    <div
+    <Card
       className={`p-4 rounded-lg border-2 transition-all cursor-pointer hover:shadow-lg ${
         isSelected
-          ? "border-blue-500 bg-blue-50"
-          : "border-gray-200 hover:border-blue-300"
+          ? "bg-secondary border-primary"
+          : "border-gray-200 hover:border-primary"
       }`}
       onClick={onSelect}
     >
@@ -26,12 +27,12 @@ export default function RocketCard({
           priority
         />
       </div>
-      <h3
-        className={`text-xl font-bold mb-2 ${isSelected ? "text-black" : ""}`}
+      <CardTitle
+        className={`text-xl font-bold mb-2 ${isSelected ? "text-primary" : ""}`}
       >
         {name}
-      </h3>
-      <p className="text-gray-600">{description}</p>
-    </div>
+      </CardTitle>
+      <CardDescription className="text-white">{description}</CardDescription>
+    </Card>
   );
 }

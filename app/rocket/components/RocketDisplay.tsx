@@ -1,5 +1,6 @@
 import { RocketDisplayProps } from "../types/index";
 import Image from "next/image";
+import { Progress } from "./ui/Progress";
 
 export default function RocketDisplay({
   progress,
@@ -7,11 +8,10 @@ export default function RocketDisplay({
   isWinner,
   rocketInfo,
 }: RocketDisplayProps) {
-  console.log("rocketInfo", rocketInfo);
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3">
-        <div className="relative w-8 h-8">
+    <div className="space-y-2 sm:space-y-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="relative w-6 h-6 sm:w-8 sm:h-8">
           <Image
             src={rocketInfo.image}
             alt={rocketInfo.name}
@@ -19,27 +19,28 @@ export default function RocketDisplay({
             className="object-cover rounded"
           />
         </div>
-        <p className="font-medium text-black">
+        <p className="font-medium text-sm sm:text-base truncate">
           {rocketInfo.name}
           {isWinner && " 🏆"}
         </p>
       </div>
       <div className="flex items-center gap-2">
-        <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
-          <div
-            className={`h-full transition-all duration-300 ${
+        <div className="flex-1">
+          <Progress
+            value={progress}
+            className="bg-white"
+            indicatorClassName={
               exploded
-                ? "bg-red-500"
+                ? "bg-destructive"
                 : isWinner
-                ? "bg-green-500"
+                ? "bg-primary"
                 : "bg-blue-500"
-            }`}
-            style={{ width: `${progress}%` }}
+            }
           />
         </div>
-        <span className="text-sm font-medium">{progress}%</span>
+        <span className="text-xs sm:text-sm font-medium min-w-[3rem] text-right">{progress}%</span>
       </div>
-      {exploded && <p className="text-red-500 text-sm">💥 Explosion !</p>}
+      {exploded && <p className="text-destructive text-xs sm:text-sm">💥 Explosion !</p>}
     </div>
   );
 }

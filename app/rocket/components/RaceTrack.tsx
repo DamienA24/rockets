@@ -1,4 +1,5 @@
 import { RaceTrackProps } from "../types/index";
+import { Progress } from "./ui/Progress";
 
 export default function RaceTrack({
   rocket1Progress,
@@ -12,66 +13,84 @@ export default function RaceTrack({
   const isRocket2Winner = rocket2Progress === 100 && !rocket2Exploded;
 
   return (
-    <div className="w-full space-y-8">
+    <div className="w-full space-y-6 sm:space-y-8">
       <div className="space-y-2">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <span
-            className={`w-24 text-sm font-medium ${
+            className={`w-16 sm:w-24 text-xs sm:text-sm font-medium truncate ${
               isRocket1Winner ? "animate-bounce" : ""
             }`}
           >
             {rocket1Name} {isRocket1Winner && "🏆"}
           </span>
-          <div className="flex-1 h-8 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className={`h-full transition-all duration-500 ${
+          <div className="flex-1">
+            <Progress
+              value={rocket1Progress}
+              className={
+                rocket1Exploded ? "bg-destructive/20" : "bg-secondary/20"
+              }
+              indicatorClassName={
                 rocket1Exploded
-                  ? "bg-red-500"
+                  ? "bg-destructive"
                   : isRocket1Winner
-                  ? "bg-blue-500 animate-pulse"
+                  ? "bg-primary animate-pulse"
                   : "bg-blue-500"
-              }`}
-              style={{ width: `${rocket1Progress}%` }}
+              }
             />
           </div>
-          <span className="w-16 text-right">{rocket1Progress}%</span>
+          <span className="w-12 sm:w-16 text-xs sm:text-sm text-right">
+            {rocket1Progress}%
+          </span>
         </div>
         {rocket1Exploded && (
-          <p className="text-red-500 text-sm">💥 Rocket exploded!</p>
+          <p className="text-destructive text-xs sm:text-sm">
+            💥 Rocket exploded!
+          </p>
         )}
         {isRocket1Winner && (
-          <p className="text-green-500 text-sm animate-bounce">🎉 Winner! 🎊</p>
+          <p className="text-primary text-xs sm:text-sm animate-bounce">
+            🎉 Winner! 🎊
+          </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <span
-            className={`w-24 text-sm font-medium ${
+            className={`w-16 sm:w-24 text-xs sm:text-sm font-medium truncate ${
               isRocket2Winner ? "animate-bounce" : ""
             }`}
           >
             {rocket2Name} {isRocket2Winner && "🏆"}
           </span>
-          <div className="flex-1 h-8 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className={`h-full transition-all duration-500 ${
+          <div className="flex-1">
+            <Progress
+              value={rocket2Progress}
+              className={
+                rocket2Exploded ? "bg-destructive/20" : "bg-secondary/20"
+              }
+              indicatorClassName={
                 rocket2Exploded
-                  ? "bg-red-500"
+                  ? "bg-destructive"
                   : isRocket2Winner
-                  ? "bg-green-500 animate-pulse"
-                  : "bg-green-500"
-              }`}
-              style={{ width: `${rocket2Progress}%` }}
+                  ? "bg-primary animate-pulse"
+                  : "bg-yellow-500"
+              }
             />
           </div>
-          <span className="w-16 text-right">{rocket2Progress}%</span>
+          <span className="w-12 sm:w-16 text-xs sm:text-sm text-right">
+            {rocket2Progress}%
+          </span>
         </div>
         {rocket2Exploded && (
-          <p className="text-red-500 text-sm">💥 Rocket exploded!</p>
+          <p className="text-destructive text-xs sm:text-sm">
+            💥 Rocket exploded!
+          </p>
         )}
         {isRocket2Winner && (
-          <p className="text-green-500 text-sm animate-bounce">🎉 Winner! 🎊</p>
+          <p className="text-primary text-xs sm:text-sm animate-bounce">
+            🎉 Winner! 🎊
+          </p>
         )}
       </div>
     </div>
